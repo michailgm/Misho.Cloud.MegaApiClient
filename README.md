@@ -1,1 +1,1 @@
-# Misho.Cloud.MegaApiClient
+# Misho.Cloud.MegaNz
