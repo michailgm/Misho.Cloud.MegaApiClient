@@ -1,0 +1,108 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{19EC0729-2C62-4137-B4A7-340E4D53CFEE}"
+	ProjectSection(SolutionItems) = preProject
+		Sources\ApiRequestFailedEventArgs.cs = Sources\ApiRequestFailedEventArgs.cs
+		Sources\CancellableStream.cs = Sources\CancellableStream.cs
+		Sources\Exceptions.cs = Sources\Exceptions.cs
+		Sources\Extensions.cs = Sources\Extensions.cs
+		Sources\IAccountInformation.cs = Sources\IAccountInformation.cs
+		Sources\IMegaApiClient.cs = Sources\IMegaApiClient.cs
+		Sources\IMegaApiClientAsync.cs = Sources\IMegaApiClientAsync.cs
+		Sources\INode.cs = Sources\INode.cs
+		Sources\IWebClient.cs = Sources\IWebClient.cs
+		Sources\JsonSerialization.cs = Sources\JsonSerialization.cs
+		Sources\MegaAesCtrStream.cs = Sources\MegaAesCtrStream.cs
+		Sources\MegaApiClient.cs = Sources\MegaApiClient.cs
+		Sources\MegaApiClientAsync.cs = Sources\MegaApiClientAsync.cs
+		Sources\Node.cs = Sources\Node.cs
+		Sources\Options.cs = Sources\Options.cs
+		Sources\ProgressionStream.cs = Sources\ProgressionStream.cs
+		Sources\WebClient_HttpClient.cs = Sources\WebClient_HttpClient.cs
+		Sources\WebClient_HttpWebRequest.cs = Sources\WebClient_HttpWebRequest.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cryptography", "Cryptography", "{230021E8-2CC7-4A7E-94CE-714042EC3313}"
+	ProjectSection(SolutionItems) = preProject
+		Sources\Cryptography\Crypto.cs = Sources\Cryptography\Crypto.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{92A9C48F-5CF1-4004-9A81-6FA78C37FC1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Android", "Android", "{98A3238C-F738-4167-BB4A-501EAD952AC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{2585B42D-F985-452D-9C9A-F056AF9A94D0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iOS", "iOS", "{7CBE512F-4C37-413D-9FB3-613A2272A449}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Windows", "Windows", "{D5E3A23D-DEE2-4C29-91AE-A7073B01CD95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{61968321-6CFB-49C6-B496-058D9D43408E}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\Android\Debug\Misho.Security.Cryptography.Android.dll = Lib\Android\Debug\Misho.Security.Cryptography.Android.dll
+		Lib\Android\Debug\Misho.Security.Cryptography.Android.pdb = Lib\Android\Debug\Misho.Security.Cryptography.Android.pdb
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{0965C290-ED32-41C0-86B6-6894A0D820AD}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.deps.json = Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.deps.json
+		Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.dll = Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.dll
+		Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.pdb = Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.pdb
+		Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.xml = Lib\Core\Debug\netstandard1.6\Misho.Security.Cryptography.Core.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{A4386AF3-4BCE-49FC-BBBB-29E6A1F78E7E}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\iOS\Debug\Misho.Security.Cryptography.iOS.dll = Lib\iOS\Debug\Misho.Security.Cryptography.iOS.dll
+		Lib\iOS\Debug\Misho.Security.Cryptography.iOS.pdb = Lib\iOS\Debug\Misho.Security.Cryptography.iOS.pdb
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{F9294A27-93FB-4C48-A50E-08B04BE869FE}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\Windows\Debug\Misho.Security.Cryptography.Windows.dll = Lib\Windows\Debug\Misho.Security.Cryptography.Windows.dll
+		Lib\Windows\Debug\Misho.Security.Cryptography.Windows.pdb = Lib\Windows\Debug\Misho.Security.Cryptography.Windows.pdb
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{FB06D63A-C39F-4E8D-ABE1-E9CBD3A3A3A8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{003CE1E5-3AD7-47A9-99AF-A091F248A8D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{1422497A-9BE2-4BBB-8F7D-D0C321C2E54D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{F45C8047-A5C9-444A-A3F9-20B9370634D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Misho.Cloud.MegaNz.Android", "Misho.Cloud.MegaNz.Android\Misho.Cloud.MegaNz.Android.csproj", "{7CD6FAF7-0C93-40E3-9D63-9071CE2963B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CD6FAF7-0C93-40E3-9D63-9071CE2963B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CD6FAF7-0C93-40E3-9D63-9071CE2963B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CD6FAF7-0C93-40E3-9D63-9071CE2963B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CD6FAF7-0C93-40E3-9D63-9071CE2963B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{230021E8-2CC7-4A7E-94CE-714042EC3313} = {19EC0729-2C62-4137-B4A7-340E4D53CFEE}
+		{98A3238C-F738-4167-BB4A-501EAD952AC0} = {92A9C48F-5CF1-4004-9A81-6FA78C37FC1D}
+		{2585B42D-F985-452D-9C9A-F056AF9A94D0} = {92A9C48F-5CF1-4004-9A81-6FA78C37FC1D}
+		{7CBE512F-4C37-413D-9FB3-613A2272A449} = {92A9C48F-5CF1-4004-9A81-6FA78C37FC1D}
+		{D5E3A23D-DEE2-4C29-91AE-A7073B01CD95} = {92A9C48F-5CF1-4004-9A81-6FA78C37FC1D}
+		{61968321-6CFB-49C6-B496-058D9D43408E} = {98A3238C-F738-4167-BB4A-501EAD952AC0}
+		{0965C290-ED32-41C0-86B6-6894A0D820AD} = {2585B42D-F985-452D-9C9A-F056AF9A94D0}
+		{A4386AF3-4BCE-49FC-BBBB-29E6A1F78E7E} = {7CBE512F-4C37-413D-9FB3-613A2272A449}
+		{F9294A27-93FB-4C48-A50E-08B04BE869FE} = {D5E3A23D-DEE2-4C29-91AE-A7073B01CD95}
+		{FB06D63A-C39F-4E8D-ABE1-E9CBD3A3A3A8} = {98A3238C-F738-4167-BB4A-501EAD952AC0}
+		{003CE1E5-3AD7-47A9-99AF-A091F248A8D2} = {2585B42D-F985-452D-9C9A-F056AF9A94D0}
+		{1422497A-9BE2-4BBB-8F7D-D0C321C2E54D} = {7CBE512F-4C37-413D-9FB3-613A2272A449}
+		{F45C8047-A5C9-444A-A3F9-20B9370634D1} = {D5E3A23D-DEE2-4C29-91AE-A7073B01CD95}
+	EndGlobalSection
+EndGlobal

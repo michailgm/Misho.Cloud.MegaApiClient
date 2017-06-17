@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7CD6FAF7-0C93-40E3-9D63-9071CE2963B9}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Misho.Cloud.MegaNz.Android</RootNamespace>
+    <AssemblyName>Misho.Cloud.MegaNz.Android</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
+    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Mono.Android" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Sources\ApiRequestFailedEventArgs.cs">
+      <Link>Sources\ApiRequestFailedEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\CancellableStream.cs">
+      <Link>Sources\CancellableStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\Cryptography\Crypto.cs">
+      <Link>Sources\Cryptography\Crypto.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\Exceptions.cs">
+      <Link>Sources\Exceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\Extensions.cs">
+      <Link>Sources\Extensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\IAccountInformation.cs">
+      <Link>Sources\IAccountInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\IMegaApiClient.cs">
+      <Link>Sources\IMegaApiClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\IMegaApiClientAsync.cs">
+      <Link>Sources\IMegaApiClientAsync.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\INode.cs">
+      <Link>Sources\INode.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\IWebClient.cs">
+      <Link>Sources\IWebClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\JsonSerialization.cs">
+      <Link>Sources\JsonSerialization.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\MegaAesCtrStream.cs">
+      <Link>Sources\MegaAesCtrStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\MegaApiClient.cs">
+      <Link>Sources\MegaApiClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\MegaApiClientAsync.cs">
+      <Link>Sources\MegaApiClientAsync.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\Node.cs">
+      <Link>Sources\Node.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\Options.cs">
+      <Link>Sources\Options.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\ProgressionStream.cs">
+      <Link>Sources\ProgressionStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\WebClient_HttpClient.cs">
+      <Link>Sources\WebClient_HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Sources\WebClient_HttpWebRequest.cs">
+      <Link>Sources\WebClient_HttpWebRequest.cs</Link>
+    </Compile>
+    <Compile Include="Resources\Resource.Designer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AboutResources.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\Values\Strings.xml" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
