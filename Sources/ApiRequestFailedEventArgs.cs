@@ -16,12 +16,12 @@ namespace Misho.Cloud.MegaNz
 
         private ApiRequestFailedEventArgs(Uri url, int attemptNum, int delayMilliseconds, ApiResultCode apiResult, string responseJson, Exception exception)
         {
-            this.ApiUrl = url;
-            this.AttemptNum = attemptNum;
-            this.DelayMilliseconds = delayMilliseconds;
-            this.ApiResult = apiResult;
-            this.ResponseJson = responseJson;
-            this.Exception = exception;
+            ApiUrl = url;
+            AttemptNum = attemptNum;
+            DelayMilliseconds = delayMilliseconds;
+            ApiResult = apiResult;
+            ResponseJson = responseJson;
+            Exception = exception;
         }
 
         public Uri ApiUrl { get; private set; }

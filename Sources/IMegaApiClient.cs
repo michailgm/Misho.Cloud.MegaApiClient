@@ -33,45 +33,17 @@ namespace Misho.Cloud.MegaNz
 
         Uri GetDownloadLink(INode node);
 
-#if NET35
-    void DownloadFile(INode node, string outputFile);
-#else
         void DownloadFile(INode node, string outputFile, CancellationToken? cancellationToken = null);
-#endif
-
-#if NET35
-    void DownloadFile(Uri uri, string outputFile);
-#else
         void DownloadFile(Uri uri, string outputFile, CancellationToken? cancellationToken = null);
-#endif
-
-#if NET35
-    Stream Download(INode node);
-#else
         Stream Download(INode node, CancellationToken? cancellationToken = null);
-#endif
-
-#if NET35
-    Stream Download(Uri uri);
-#else
         Stream Download(Uri uri, CancellationToken? cancellationToken = null);
-#endif
 
         INodeInfo GetNodeFromLink(Uri uri);
 
         IEnumerable<INode> GetNodesFromLink(Uri uri);
 
-#if NET35
-    INode UploadFile(string filename, INode parent);
-#else
         INode UploadFile(string filename, INode parent, CancellationToken? cancellationToken = null);
-#endif
-
-#if NET35
-    INode Upload(Stream stream, string name, INode parent, DateTime? lastModifiedDate = null);
-#else
         INode Upload(Stream stream, string name, INode parent, DateTime? modificationDate = null, CancellationToken? cancellationToken = null);
-#endif
 
         INode Move(INode node, INode destinationParentNode);
 

@@ -25,17 +25,17 @@ namespace Misho.Cloud.MegaNz
           long reportProgressChunkSize = DefaultReportProgressChunkSize
           )
         {
-            this.ApplicationKey = applicationKey;
-            this.SynchronizeApiRequests = synchronizeApiRequests;
+            ApplicationKey = applicationKey;
+            SynchronizeApiRequests = synchronizeApiRequests;
 
-            this.ApiRequestAttempts = apiRequestAttempts;
-            this.ApiRequestDelay = apiRequestDelay;
-            this.ApiRequestDelayExponentialFactor = apiRequestDelayExponentialFactor;
+            ApiRequestAttempts = apiRequestAttempts;
+            ApiRequestDelay = apiRequestDelay;
+            ApiRequestDelayExponentialFactor = apiRequestDelayExponentialFactor;
 
-            this.BufferSize = bufferSize;
-            this.ChunksPackSize = chunksPackSize;
+            BufferSize = bufferSize;
+            ChunksPackSize = chunksPackSize;
 
-            this.ReportProgressChunkSize = reportProgressChunkSize;
+            ReportProgressChunkSize = reportProgressChunkSize;
         }
 
         public string ApplicationKey { get; }

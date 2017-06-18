@@ -14,16 +14,16 @@ namespace Misho.Cloud.MegaNz
 
         internal NodeInfo(string id, DownloadUrlResponse downloadResponse, byte[] key)
         {
-            this.Id = id;
-            this.Attributes = Crypto.DecryptAttributes(downloadResponse.SerializedAttributes.FromBase64(), key);
-            this.Size = downloadResponse.Size;
-            this.Type = NodeType.File;
+            Id = id;
+            Attributes = Crypto.DecryptAttributes(downloadResponse.SerializedAttributes.FromBase64(), key);
+            Size = downloadResponse.Size;
+            Type = NodeType.File;
         }
 
         [JsonIgnore]
         public string Name
         {
-            get { return this.Attributes?.Name; }
+            get { return Attributes?.Name; }
         }
 
         [JsonProperty("s")]
@@ -38,7 +38,7 @@ namespace Misho.Cloud.MegaNz
         [JsonIgnore]
         public DateTime? ModificationDate
         {
-            get { return this.Attributes?.ModificationDate; }
+            get { return Attributes?.ModificationDate; }
         }
 
         [JsonIgnore]
@@ -46,17 +46,17 @@ namespace Misho.Cloud.MegaNz
 
         public bool Equals(INodeInfo other)
         {
-            return other != null && this.Id == other.Id;
+            return other != null && Id == other.Id;
         }
 
         public override int GetHashCode()
         {
-            return this.Id.GetHashCode();
+            return Id.GetHashCode();
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as INodeInfo);
+            return Equals(obj as INodeInfo);
         }
     }
 
@@ -114,9 +114,9 @@ namespace Misho.Cloud.MegaNz
             if (context.Length == 1)
             {
                 // Add key from incoming sharing.
-                if (this.SharingKey != null && nodesResponse.SharedKeys.Any(x => x.Id == this.Id) == false)
+                if (SharingKey != null && nodesResponse.SharedKeys.Any(x => x.Id == Id) == false)
                 {
-                    nodesResponse.SharedKeys.Add(new SharedKey(this.Id, this.SharingKey));
+                    nodesResponse.SharedKeys.Add(new SharedKey(Id, SharingKey));
                 }
                 return;
             }
@@ -124,14 +124,14 @@ namespace Misho.Cloud.MegaNz
             {
                 byte[] masterKey = (byte[])context[1];
 
-                this.CreationDate = this.SerializedCreationDate.ToDateTime();
+                CreationDate = SerializedCreationDate.ToDateTime();
 
-                if (this.Type == NodeType.File || this.Type == NodeType.Directory)
+                if (Type == NodeType.File || Type == NodeType.Directory)
                 {
                     // There are cases where the SerializedKey property contains multiple keys separated with /
                     // This can occur when a folder is shared and the parent is shared too.
                     // Both keys are working so we use the first one
-                    string serializedKey = this.SerializedKey.Split('/')[0];
+                    string serializedKey = SerializedKey.Split('/')[0];
                     int splitPosition = serializedKey.IndexOf(":", StringComparison.InvariantCulture);
                     byte[] encryptedKey = serializedKey.Substring(splitPosition + 1).FromBase64();
 
@@ -143,34 +143,34 @@ namespace Misho.Cloud.MegaNz
                         if (sharedKey != null)
                         {
                             masterKey = Crypto.DecryptKey(sharedKey.Key.FromBase64(), masterKey);
-                            if (this.Type == NodeType.Directory)
+                            if (Type == NodeType.Directory)
                             {
-                                this.SharedKey = masterKey;
+                                SharedKey = masterKey;
                             }
                             else
                             {
-                                this.SharedKey = Crypto.DecryptKey(encryptedKey, masterKey);
+                                SharedKey = Crypto.DecryptKey(encryptedKey, masterKey);
                             }
                         }
                     }
 
-                    this.FullKey = Crypto.DecryptKey(encryptedKey, masterKey);
+                    FullKey = Crypto.DecryptKey(encryptedKey, masterKey);
 
-                    if (this.Type == NodeType.File)
+                    if (Type == NodeType.File)
                     {
                         byte[] iv, metaMac, fileKey;
-                        Crypto.GetPartsFromDecryptedKey(this.FullKey, out iv, out metaMac, out fileKey);
+                        Crypto.GetPartsFromDecryptedKey(FullKey, out iv, out metaMac, out fileKey);
 
-                        this.Iv = iv;
-                        this.MetaMac = metaMac;
-                        this.Key = fileKey;
+                        Iv = iv;
+                        MetaMac = metaMac;
+                        Key = fileKey;
                     }
                     else
                     {
-                        this.Key = this.FullKey;
+                        Key = FullKey;
                     }
 
-                    this.Attributes = Crypto.DecryptAttributes(this.SerializedAttributes.FromBase64(), this.Key);
+                    Attributes = Crypto.DecryptAttributes(SerializedAttributes.FromBase64(), Key);
                 }
             }
         }
@@ -184,29 +184,29 @@ namespace Misho.Cloud.MegaNz
         internal PublicNode(Node node, string shareId)
         {
             this.node = node;
-            this.ShareId = shareId;
+            ShareId = shareId;
         }
 
         public string ShareId { get; }
 
         public bool Equals(INodeInfo other)
         {
-            return this.node.Equals(other) && this.ShareId == (other as PublicNode)?.ShareId;
+            return node.Equals(other) && ShareId == (other as PublicNode)?.ShareId;
         }
 
-        public long Size { get { return this.node.Size; } }
-        public string Name { get { return this.node.Name; } }
-        public DateTime? ModificationDate { get { return this.node.ModificationDate; } }
-        public string Id { get { return this.node.Id; } }
-        public string ParentId { get { return this.node.ParentId; } }
-        public string Owner { get { return this.node.Owner; } }
-        public NodeType Type { get { return this.node.Type; } }
-        public DateTime CreationDate { get { return this.node.CreationDate; } }
+        public long Size { get { return node.Size; } }
+        public string Name { get { return node.Name; } }
+        public DateTime? ModificationDate { get { return node.ModificationDate; } }
+        public string Id { get { return node.Id; } }
+        public string ParentId { get { return node.ParentId; } }
+        public string Owner { get { return node.Owner; } }
+        public NodeType Type { get { return node.Type; } }
+        public DateTime CreationDate { get { return node.CreationDate; } }
 
-        public byte[] Key { get { return this.node.Key; } }
-        public byte[] SharedKey { get { return this.node.SharedKey; } }
-        public byte[] Iv { get { return this.node.Iv; } }
-        public byte[] MetaMac { get { return this.node.MetaMac; } }
-        public byte[] FullKey { get { return this.node.FullKey; } }
+        public byte[] Key { get { return node.Key; } }
+        public byte[] SharedKey { get { return node.SharedKey; } }
+        public byte[] Iv { get { return node.Iv; } }
+        public byte[] MetaMac { get { return node.MetaMac; } }
+        public byte[] FullKey { get { return node.FullKey; } }
     }
 }

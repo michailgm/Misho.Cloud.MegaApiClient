@@ -14,24 +14,24 @@ namespace Misho.Cloud.MegaNz
 
         public byte[] FileKey
         {
-            get { return this.fileKey; }
+            get { return fileKey; }
         }
 
         public byte[] Iv
         {
-            get { return this.iv; }
+            get { return iv; }
         }
 
         public byte[] MetaMac
         {
             get
             {
-                if (this.position != this.streamLength)
+                if (position != streamLength)
                 {
                     throw new NotSupportedException("Stream must be fully read to obtain computed FileMac");
                 }
 
-                return this.metaMac;
+                return metaMac;
             }
         }
     }
@@ -53,7 +53,7 @@ namespace Misho.Cloud.MegaNz
 
         protected override void OnStreamRead()
         {
-            if (!this.expectedMetaMac.SequenceEqual(this.metaMac))
+            if (!expectedMetaMac.SequenceEqual(metaMac))
             {
                 throw new DownloadException();
             }
@@ -99,7 +99,7 @@ namespace Misho.Cloud.MegaNz
             this.fileKey = fileKey;
             this.iv = iv;
 
-            this.chunksPositions = this.GetChunksPositions(this.streamLength);
+            chunksPositions = GetChunksPositions(this.streamLength);
         }
 
         protected enum Mode
@@ -110,7 +110,7 @@ namespace Misho.Cloud.MegaNz
 
         public long[] ChunksPositions
         {
-            get { return this.chunksPositions; }
+            get { return chunksPositions; }
         }
 
         public override bool CanRead
@@ -130,19 +130,19 @@ namespace Misho.Cloud.MegaNz
 
         public override long Length
         {
-            get { return this.streamLength; }
+            get { return streamLength; }
         }
 
         public override long Position
         {
             get
             {
-                return this.position;
+                return position;
             }
 
             set
             {
-                if (this.position != value)
+                if (position != value)
                 {
                     throw new NotSupportedException("Seek is not supported");
                 }
@@ -151,78 +151,78 @@ namespace Misho.Cloud.MegaNz
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (this.position == this.streamLength)
+            if (position == streamLength)
             {
                 return 0;
             }
 
-            for (long pos = this.position; pos < Math.Min(this.position + count, this.streamLength); pos += 16)
+            for (long pos = position; pos < Math.Min(position + count, streamLength); pos += 16)
             {
                 // We are on a chunk bondary
-                if (this.chunksPositions.Any(chunk => chunk == pos))
+                if (chunksPositions.Any(chunk => chunk == pos))
                 {
                     if (pos != 0)
                     {
                         // Compute the current chunk mac data on each chunk bondary
-                        this.ComputeChunk();
+                        ComputeChunk();
                     }
 
                     // Init chunk mac with Iv values
                     for (int i = 0; i < 8; i++)
                     {
-                        this.currentChunkMac[i] = this.iv[i];
-                        this.currentChunkMac[i + 8] = this.iv[i];
+                        currentChunkMac[i] = iv[i];
+                        currentChunkMac[i + 8] = iv[i];
                     }
                 }
 
-                this.IncrementCounter();
+                IncrementCounter();
 
                 // Iterate each AES 16 bytes block
                 byte[] input = new byte[16];
                 byte[] output = new byte[input.Length];
-                int inputLength = this.stream.Read(input, 0, input.Length);
+                int inputLength = stream.Read(input, 0, input.Length);
                 if (inputLength != input.Length)
                 {
                     // Sometimes, the stream is not finished but the read is not complete
-                    inputLength += this.stream.Read(input, inputLength, input.Length - inputLength);
+                    inputLength += stream.Read(input, inputLength, input.Length - inputLength);
                 }
 
                 // Merge Iv and counter
                 byte[] ivCounter = new byte[16];
-                Array.Copy(this.iv, ivCounter, 8);
-                Array.Copy(this.counter, 0, ivCounter, 8, 8);
+                Array.Copy(iv, ivCounter, 8);
+                Array.Copy(counter, 0, ivCounter, 8, 8);
 
-                byte[] encryptedIvCounter = Crypto.EncryptAes(ivCounter, this.fileKey);
+                byte[] encryptedIvCounter = Crypto.EncryptAes(ivCounter, fileKey);
 
                 for (int inputPos = 0; inputPos < inputLength; inputPos++)
                 {
                     output[inputPos] = (byte)(encryptedIvCounter[inputPos] ^ input[inputPos]);
-                    this.currentChunkMac[inputPos] ^= (this.mode == Mode.Crypt) ? input[inputPos] : output[inputPos];
+                    currentChunkMac[inputPos] ^= (mode == Mode.Crypt) ? input[inputPos] : output[inputPos];
                 }
 
                 // Copy to buffer
-                Array.Copy(output, 0, buffer, offset + pos - this.position, Math.Min(output.Length, this.streamLength - pos));
+                Array.Copy(output, 0, buffer, offset + pos - position, Math.Min(output.Length, streamLength - pos));
 
                 // Crypt to current chunk mac
-                this.currentChunkMac = Crypto.EncryptAes(this.currentChunkMac, this.fileKey);
+                currentChunkMac = Crypto.EncryptAes(currentChunkMac, fileKey);
             }
 
-            long len = Math.Min(count, this.streamLength - this.position);
-            this.position += len;
+            long len = Math.Min(count, streamLength - position);
+            position += len;
 
             // When stream is fully processed, we compute the last chunk
-            if (this.position == this.streamLength)
+            if (position == streamLength)
             {
-                this.ComputeChunk();
+                ComputeChunk();
 
                 // Compute Meta MAC
                 for (int i = 0; i < 4; i++)
                 {
-                    this.metaMac[i] = (byte)(this.fileMac[i] ^ this.fileMac[i + 4]);
-                    this.metaMac[i + 4] = (byte)(this.fileMac[i + 8] ^ this.fileMac[i + 12]);
+                    metaMac[i] = (byte)(fileMac[i] ^ fileMac[i + 4]);
+                    metaMac[i + 4] = (byte)(fileMac[i + 8] ^ fileMac[i + 12]);
                 }
 
-                this.OnStreamRead();
+                OnStreamRead();
             }
 
             return (int)len;
@@ -254,7 +254,7 @@ namespace Misho.Cloud.MegaNz
 
         private void IncrementCounter()
         {
-            byte[] counter = BitConverter.GetBytes(this.currentCounter++);
+            byte[] counter = BitConverter.GetBytes(currentCounter++);
             if (BitConverter.IsLittleEndian)
             {
                 Array.Reverse(counter);
@@ -267,10 +267,10 @@ namespace Misho.Cloud.MegaNz
         {
             for (int i = 0; i < 16; i++)
             {
-                this.fileMac[i] ^= this.currentChunkMac[i];
+                fileMac[i] ^= currentChunkMac[i];
             }
 
-            this.fileMac = Crypto.EncryptAes(this.fileMac, this.fileKey);
+            fileMac = Crypto.EncryptAes(fileMac, fileKey);
         }
 
         private long[] GetChunksPositions(long size)

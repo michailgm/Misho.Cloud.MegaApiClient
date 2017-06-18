@@ -15,8 +15,8 @@ namespace Misho.Cloud.MegaNz
     {
         protected RequestBase(string action)
         {
-            this.Action = action;
-            this.QueryArguments = new NameValueCollection();
+            Action = action;
+            QueryArguments = new NameValueCollection();
         }
 
         [JsonProperty("a")]
@@ -31,8 +31,8 @@ namespace Misho.Cloud.MegaNz
         public LoginRequest(string userHandle, string passwordHash)
           : base("us")
         {
-            this.UserHandle = userHandle;
-            this.PasswordHash = passwordHash;
+            UserHandle = userHandle;
+            PasswordHash = passwordHash;
         }
 
         [JsonProperty("user")]
@@ -62,8 +62,8 @@ namespace Misho.Cloud.MegaNz
         public AnonymousLoginRequest(string masterKey, string temporarySession)
           : base("up")
         {
-            this.MasterKey = masterKey;
-            this.TemporarySession = temporarySession;
+            MasterKey = masterKey;
+            TemporarySession = temporarySession;
         }
 
         [JsonProperty("k")]
@@ -115,17 +115,17 @@ namespace Misho.Cloud.MegaNz
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
-            this.Metrics = this.MetricsSerialized.Select(x => (IStorageMetrics)new StorageMetrics(x.Key, x.Value));
+            Metrics = MetricsSerialized.Select(x => (IStorageMetrics)new StorageMetrics(x.Key, x.Value));
         }
 
         private class StorageMetrics : IStorageMetrics
         {
             public StorageMetrics(string nodeId, long[] metrics)
             {
-                this.NodeId = nodeId;
-                this.BytesUsed = metrics[0];
-                this.FilesCount = metrics[1];
-                this.FoldersCount = metrics[2];
+                NodeId = nodeId;
+                BytesUsed = metrics[0];
+                FilesCount = metrics[1];
+                FoldersCount = metrics[2];
             }
 
             public string NodeId { get; }
@@ -143,11 +143,11 @@ namespace Misho.Cloud.MegaNz
         public GetNodesRequest(string shareId = null)
           : base("f")
         {
-            this.c = 1;
+            c = 1;
 
             if (shareId != null)
             {
-                this.QueryArguments["n"] = shareId;
+                QueryArguments["n"] = shareId;
             }
         }
 
@@ -171,11 +171,11 @@ namespace Misho.Cloud.MegaNz
 
             // First Nodes deserialization to retrieve all shared keys
             settings.Context = new StreamingContext(StreamingContextStates.All, new[] { this });
-            JsonConvert.DeserializeObject<Node[]>(this.NodesSerialized.ToString(), settings);
+            JsonConvert.DeserializeObject<Node[]>(NodesSerialized.ToString(), settings);
 
             // Deserialize nodes
             settings.Context = new StreamingContext(StreamingContextStates.All, new[] { this, ctx.Context });
-            this.Nodes = JsonConvert.DeserializeObject<Node[]>(this.NodesSerialized.ToString(), settings);
+            Nodes = JsonConvert.DeserializeObject<Node[]>(NodesSerialized.ToString(), settings);
         }
     }
 
@@ -184,7 +184,7 @@ namespace Misho.Cloud.MegaNz
         public DeleteRequest(INode node)
           : base("d")
         {
-            this.Node = node.Id;
+            Node = node.Id;
         }
 
         [JsonProperty("n")]
@@ -196,7 +196,7 @@ namespace Misho.Cloud.MegaNz
         public GetDownloadLinkRequest(INode node)
           : base("l")
         {
-            this.Id = node.Id;
+            Id = node.Id;
         }
 
         [JsonProperty("n")]
@@ -208,8 +208,8 @@ namespace Misho.Cloud.MegaNz
         private CreateNodeRequest(INode parentNode, NodeType type, string attributes, string encryptedKey, byte[] key, string completionHandle)
           : base("p")
         {
-            this.ParentId = parentNode.Id;
-            this.Nodes = new[]
+            ParentId = parentNode.Id;
+            Nodes = new[]
             {
         new CreateNodeRequestData
         {
@@ -228,8 +228,8 @@ namespace Misho.Cloud.MegaNz
 
             if (parentNodeCrypto.SharedKey != null)
             {
-                this.Share = new ShareData(parentNode.Id);
-                this.Share.AddItem(completionHandle, key, parentNodeCrypto.SharedKey);
+                Share = new ShareData(parentNode.Id);
+                Share.AddItem(completionHandle, key, parentNodeCrypto.SharedKey);
             }
         }
 
@@ -273,8 +273,8 @@ namespace Misho.Cloud.MegaNz
         public ShareNodeRequest(INode node, byte[] masterKey, IEnumerable<INode> nodes)
           : base("s2")
         {
-            this.Id = node.Id;
-            this.Options = new object[] { new { r = 0, u = "EXP" } };
+            Id = node.Id;
+            Options = new object[] { new { r = 0, u = "EXP" } };
 
             INodeCrypto nodeCrypto = (INodeCrypto)node;
             byte[] uncryptedSharedKey = nodeCrypto.SharedKey;
@@ -283,24 +283,24 @@ namespace Misho.Cloud.MegaNz
                 uncryptedSharedKey = Crypto.CreateAesKey();
             }
 
-            this.SharedKey = Crypto.EncryptKey(uncryptedSharedKey, masterKey).ToBase64();
+            SharedKey = Crypto.EncryptKey(uncryptedSharedKey, masterKey).ToBase64();
 
             if (nodeCrypto.SharedKey == null)
             {
-                this.Share = new ShareData(node.Id);
+                Share = new ShareData(node.Id);
 
-                this.Share.AddItem(node.Id, nodeCrypto.FullKey, uncryptedSharedKey);
+                Share.AddItem(node.Id, nodeCrypto.FullKey, uncryptedSharedKey);
 
                 // Add all children
-                IEnumerable<INode> allChildren = this.GetRecursiveChildren(nodes.ToArray(), node);
+                IEnumerable<INode> allChildren = GetRecursiveChildren(nodes.ToArray(), node);
                 foreach (var child in allChildren)
                 {
-                    this.Share.AddItem(child.Id, ((INodeCrypto)child).FullKey, uncryptedSharedKey);
+                    Share.AddItem(child.Id, ((INodeCrypto)child).FullKey, uncryptedSharedKey);
                 }
             }
 
             byte[] handle = (node.Id + node.Id).ToBytes();
-            this.HandleAuth = Crypto.EncryptKey(handle, masterKey).ToBase64();
+            HandleAuth = Crypto.EncryptKey(handle, masterKey).ToBase64();
         }
 
         private IEnumerable<INode> GetRecursiveChildren(INode[] nodes, INode parent)
@@ -341,7 +341,7 @@ namespace Misho.Cloud.MegaNz
         public UploadUrlRequest(long fileSize)
           : base("u")
         {
-            this.Size = fileSize;
+            Size = fileSize;
         }
 
         [JsonProperty("s")]
@@ -359,12 +359,12 @@ namespace Misho.Cloud.MegaNz
         public DownloadUrlRequest(INode node)
           : base("g")
         {
-            this.Id = node.Id;
+            Id = node.Id;
 
             PublicNode publicNode = node as PublicNode;
             if (publicNode != null)
             {
-                this.QueryArguments["n"] = publicNode.ShareId;
+                QueryArguments["n"] = publicNode.ShareId;
             }
         }
 
@@ -379,7 +379,7 @@ namespace Misho.Cloud.MegaNz
         public DownloadUrlRequestFromId(string id)
           : base("g")
         {
-            this.Id = id;
+            Id = id;
         }
 
         public int g { get { return 1; } }
@@ -405,8 +405,8 @@ namespace Misho.Cloud.MegaNz
         public MoveRequest(INode node, INode destinationParentNode)
           : base("m")
         {
-            this.Id = node.Id;
-            this.DestinationParentId = destinationParentNode.Id;
+            Id = node.Id;
+            DestinationParentId = destinationParentNode.Id;
         }
 
         [JsonProperty("n")]
@@ -421,8 +421,8 @@ namespace Misho.Cloud.MegaNz
         public RenameRequest(INode node, string attributes)
           : base("a")
         {
-            this.Id = node.Id;
-            this.SerializedAttributes = attributes;
+            Id = node.Id;
+            SerializedAttributes = attributes;
         }
 
         [JsonProperty("n")]
@@ -447,24 +447,24 @@ namespace Misho.Cloud.MegaNz
 
         public Attributes(string name)
         {
-            this.Name = name;
+            Name = name;
         }
 
         public Attributes(string name, Attributes originalAttributes)
         {
-            this.Name = name;
-            this.SerializedFingerprint = originalAttributes.SerializedFingerprint;
+            Name = name;
+            SerializedFingerprint = originalAttributes.SerializedFingerprint;
         }
 
         public Attributes(string name, Stream stream, DateTime? modificationDate = null)
         {
-            this.Name = name;
+            Name = name;
 
             if (modificationDate.HasValue)
             {
                 byte[] fingerprintBuffer = new byte[FingerprintMaxSize];
 
-                uint[] crc = this.ComputeCrc(stream);
+                uint[] crc = ComputeCrc(stream);
                 Buffer.BlockCopy(crc, 0, fingerprintBuffer, 0, CrcSize);
 
                 byte[] serializedModificationDate = modificationDate.Value.ToEpoch().SerializeToBytes();
@@ -472,7 +472,7 @@ namespace Misho.Cloud.MegaNz
 
                 Array.Resize(ref fingerprintBuffer, fingerprintBuffer.Length - (sizeof(long) + 1) + serializedModificationDate.Length);
 
-                this.SerializedFingerprint = Convert.ToBase64String(fingerprintBuffer);
+                SerializedFingerprint = Convert.ToBase64String(fingerprintBuffer);
             }
         }
 
@@ -491,10 +491,10 @@ namespace Misho.Cloud.MegaNz
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
-            if (this.SerializedFingerprint != null)
+            if (SerializedFingerprint != null)
             {
-                var fingerprintBytes = this.SerializedFingerprint.FromBase64();
-                this.ModificationDate = fingerprintBytes.DeserializeToLong(CrcSize, fingerprintBytes.Length - CrcSize).ToDateTime();
+                var fingerprintBytes = SerializedFingerprint.FromBase64();
+                ModificationDate = fingerprintBytes.DeserializeToLong(CrcSize, fingerprintBytes.Length - CrcSize).ToDateTime();
             }
         }
 
@@ -580,13 +580,13 @@ namespace Misho.Cloud.MegaNz
 
         public ShareData(string nodeId)
         {
-            this.NodeId = nodeId;
-            this.items = new List<ShareDataItem>();
+            NodeId = nodeId;
+            items = new List<ShareDataItem>();
         }
 
         public string NodeId { get; private set; }
 
-        public IEnumerable<ShareDataItem> Items { get { return this.items; } }
+        public IEnumerable<ShareDataItem> Items { get { return items; } }
 
         public void AddItem(string nodeId, byte[] data, byte[] key)
         {
@@ -597,7 +597,7 @@ namespace Misho.Cloud.MegaNz
                 Key = key
             };
 
-            this.items.Add(item);
+            items.Add(item);
         }
 
         public class ShareDataItem
@@ -662,8 +662,8 @@ namespace Misho.Cloud.MegaNz
     {
         public SharedKey(string id, string key)
         {
-            this.Id = id;
-            this.Key = key;
+            Id = id;
+            Key = key;
         }
 
         [JsonProperty("h")]

@@ -16,9 +16,9 @@ namespace Misho.Cloud.MegaNz
 
         public WebClient(int responseTimeout = DefaultResponseTimeout, ProductInfoHeaderValue userAgent = null)
         {
-            this.BufferSize = Options.DefaultBufferSize;
-            this.httpClient.Timeout = TimeSpan.FromMilliseconds(responseTimeout);
-            this.httpClient.DefaultRequestHeaders.UserAgent.Add(userAgent ?? this.GenerateUserAgent());
+            BufferSize = Options.DefaultBufferSize;
+            httpClient.Timeout = TimeSpan.FromMilliseconds(responseTimeout);
+            httpClient.DefaultRequestHeaders.UserAgent.Add(userAgent ?? GenerateUserAgent());
         }
 
         public int BufferSize { get; set; }
@@ -27,26 +27,26 @@ namespace Misho.Cloud.MegaNz
         {
             using (MemoryStream jsonStream = new MemoryStream(jsonData.ToBytes()))
             {
-                return this.PostRequest(url, jsonStream, "application/json");
+                return PostRequest(url, jsonStream, "application/json");
             }
         }
 
         public string PostRequestRaw(Uri url, Stream dataStream)
         {
-            return this.PostRequest(url, dataStream, "application/octet-stream");
+            return PostRequest(url, dataStream, "application/octet-stream");
         }
 
         public Stream GetRequestRaw(Uri url)
         {
-            return this.httpClient.GetStreamAsync(url).Result;
+            return httpClient.GetStreamAsync(url).Result;
         }
 
         private string PostRequest(Uri url, Stream dataStream, string contentType)
         {
-            using (StreamContent content = new StreamContent(dataStream, this.BufferSize))
+            using (StreamContent content = new StreamContent(dataStream, BufferSize))
             {
                 content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-                using (HttpResponseMessage response = this.httpClient.PostAsync(url, content).Result)
+                using (HttpResponseMessage response = httpClient.PostAsync(url, content).Result)
                 {
                     using (Stream stream = response.Content.ReadAsStreamAsync().Result)
                     {

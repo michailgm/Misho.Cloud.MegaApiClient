@@ -11,12 +11,7 @@ namespace Misho.Cloud.MegaNz
 
         public CancellableStream(Stream stream, CancellationToken cancellationToken)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
-            this.stream = stream;
+            this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
             this.cancellationToken = cancellationToken;
         }
 
@@ -24,8 +19,8 @@ namespace Misho.Cloud.MegaNz
         {
             get
             {
-                this.cancellationToken.ThrowIfCancellationRequested();
-                return this.stream.CanRead;
+                cancellationToken.ThrowIfCancellationRequested();
+                return stream.CanRead;
             }
         }
 
@@ -33,8 +28,8 @@ namespace Misho.Cloud.MegaNz
         {
             get
             {
-                this.cancellationToken.ThrowIfCancellationRequested();
-                return this.stream.CanSeek;
+                cancellationToken.ThrowIfCancellationRequested();
+                return stream.CanSeek;
             }
         }
 
@@ -42,23 +37,23 @@ namespace Misho.Cloud.MegaNz
         {
             get
             {
-                this.cancellationToken.ThrowIfCancellationRequested();
-                return this.stream.CanWrite;
+                cancellationToken.ThrowIfCancellationRequested();
+                return stream.CanWrite;
             }
         }
 
         public override void Flush()
         {
-            this.cancellationToken.ThrowIfCancellationRequested();
-            this.stream.Flush();
+            cancellationToken.ThrowIfCancellationRequested();
+            stream.Flush();
         }
 
         public override long Length
         {
             get
             {
-                this.cancellationToken.ThrowIfCancellationRequested();
-                return this.stream.Length;
+                cancellationToken.ThrowIfCancellationRequested();
+                return stream.Length;
             }
         }
 
@@ -66,44 +61,44 @@ namespace Misho.Cloud.MegaNz
         {
             get
             {
-                this.cancellationToken.ThrowIfCancellationRequested();
-                return this.stream.Position;
+                cancellationToken.ThrowIfCancellationRequested();
+                return stream.Position;
             }
 
             set
             {
-                this.cancellationToken.ThrowIfCancellationRequested();
-                this.stream.Position = value;
+                cancellationToken.ThrowIfCancellationRequested();
+                stream.Position = value;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            this.cancellationToken.ThrowIfCancellationRequested();
-            return this.stream.Read(buffer, offset, count);
+            cancellationToken.ThrowIfCancellationRequested();
+            return stream.Read(buffer, offset, count);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            this.cancellationToken.ThrowIfCancellationRequested();
-            return this.stream.Seek(offset, origin);
+            cancellationToken.ThrowIfCancellationRequested();
+            return stream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            this.cancellationToken.ThrowIfCancellationRequested();
-            this.stream.SetLength(value);
+            cancellationToken.ThrowIfCancellationRequested();
+            stream.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            this.cancellationToken.ThrowIfCancellationRequested();
-            this.stream.Write(buffer, offset, count);
+            cancellationToken.ThrowIfCancellationRequested();
+            stream.Write(buffer, offset, count);
         }
 
         public override void Close()
         {
-            this.stream?.Close();
+            stream?.Close();
 
             base.Close();
         }
@@ -112,8 +107,8 @@ namespace Misho.Cloud.MegaNz
         {
             if (disposing)
             {
-                this.stream?.Dispose();
-                this.stream = null;
+                stream?.Dispose();
+                stream = null;
             }
         }
     }

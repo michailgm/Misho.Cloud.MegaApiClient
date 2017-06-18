@@ -10,74 +10,74 @@ namespace Misho.Cloud.MegaNz
     {
         public Task<LogonSessionToken> LoginAsync(string email, string password)
         {
-            return Task.Run(() => this.Login(email, password));
+            return Task.Run(() => Login(email, password));
         }
 
         public Task<LogonSessionToken> LoginAsync(AuthInfos authInfos)
         {
-            return Task.Run(() => this.Login(authInfos));
+            return Task.Run(() => Login(authInfos));
         }
 
         public Task LoginAsync(LogonSessionToken logonSessionToken)
         {
-            return Task.Run(() => this.Login(logonSessionToken));
+            return Task.Run(() => Login(logonSessionToken));
         }
 
         public Task LoginAnonymousAsync()
         {
-            return Task.Run(() => this.LoginAnonymous());
+            return Task.Run(() => LoginAnonymous());
         }
 
         public Task LogoutAsync()
         {
-            return Task.Run(() => this.Logout());
+            return Task.Run(() => Logout());
         }
 
         public Task<IAccountInformation> GetAccountInformationAsync()
         {
-            return Task.Run(() => this.GetAccountInformation());
+            return Task.Run(() => GetAccountInformation());
         }
 
         public Task<IEnumerable<INode>> GetNodesAsync()
         {
-            return Task.Run(() => this.GetNodes());
+            return Task.Run(() => GetNodes());
         }
 
         public Task<IEnumerable<INode>> GetNodesAsync(INode parent)
         {
-            return Task.Run(() => this.GetNodes(parent));
+            return Task.Run(() => GetNodes(parent));
         }
 
         public Task<INode> CreateFolderAsync(string name, INode parent)
         {
-            return Task.Run(() => this.CreateFolder(name, parent));
+            return Task.Run(() => CreateFolder(name, parent));
         }
 
         public Task DeleteAsync(INode node, bool moveToTrash = true)
         {
-            return Task.Run(() => this.Delete(node, moveToTrash));
+            return Task.Run(() => Delete(node, moveToTrash));
         }
 
         public Task<INode> MoveAsync(INode sourceNode, INode destinationParentNode)
         {
-            return Task.Run(() => this.Move(sourceNode, destinationParentNode));
+            return Task.Run(() => Move(sourceNode, destinationParentNode));
         }
 
         public Task<INode> RenameAsync(INode sourceNode, string newName)
         {
-            return Task.Run(() => this.Rename(sourceNode, newName));
+            return Task.Run(() => Rename(sourceNode, newName));
         }
 
         public Task<Uri> GetDownloadLinkAsync(INode node)
         {
-            return Task.Run(() => this.GetDownloadLink(node));
+            return Task.Run(() => GetDownloadLink(node));
         }
 
         public Task<Stream> DownloadAsync(INode node, IProgress<double> progress, CancellationToken? cancellationToken = null)
         {
             return Task.Run(() =>
             {
-                return (Stream)new ProgressionStream(this.Download(node, cancellationToken), progress, this.options.ReportProgressChunkSize);
+                return (Stream)new ProgressionStream(Download(node, cancellationToken), progress, options.ReportProgressChunkSize);
             }, cancellationToken.GetValueOrDefault());
         }
 
@@ -85,7 +85,7 @@ namespace Misho.Cloud.MegaNz
         {
             return Task.Run(() =>
             {
-                return (Stream)new ProgressionStream(this.Download(uri, cancellationToken), progress, this.options.ReportProgressChunkSize);
+                return (Stream)new ProgressionStream(Download(uri, cancellationToken), progress, options.ReportProgressChunkSize);
             }, cancellationToken.GetValueOrDefault());
         }
 
@@ -93,9 +93,9 @@ namespace Misho.Cloud.MegaNz
         {
             return Task.Run(() =>
             {
-                using (Stream stream = new ProgressionStream(this.Download(node, cancellationToken), progress, this.options.ReportProgressChunkSize))
+                using (Stream stream = new ProgressionStream(Download(node, cancellationToken), progress, options.ReportProgressChunkSize))
                 {
-                    this.SaveStream(stream, outputFile);
+                    SaveStream(stream, outputFile);
                 }
             }, cancellationToken.GetValueOrDefault());
         }
@@ -109,9 +109,9 @@ namespace Misho.Cloud.MegaNz
                     throw new ArgumentNullException("outputFile");
                 }
 
-                using (Stream stream = new ProgressionStream(this.Download(uri, cancellationToken), progress, this.options.ReportProgressChunkSize))
+                using (Stream stream = new ProgressionStream(Download(uri, cancellationToken), progress, options.ReportProgressChunkSize))
                 {
-                    this.SaveStream(stream, outputFile);
+                    SaveStream(stream, outputFile);
                 }
             }, cancellationToken.GetValueOrDefault());
         }
@@ -125,9 +125,9 @@ namespace Misho.Cloud.MegaNz
                     throw new ArgumentNullException("stream");
                 }
 
-                using (Stream progressionStream = new ProgressionStream(stream, progress, this.options.ReportProgressChunkSize))
+                using (Stream progressionStream = new ProgressionStream(stream, progress, options.ReportProgressChunkSize))
                 {
-                    return this.Upload(progressionStream, name, parent, modificationDate, cancellationToken);
+                    return Upload(progressionStream, name, parent, modificationDate, cancellationToken);
                 }
             }, cancellationToken.GetValueOrDefault());
         }
@@ -137,21 +137,21 @@ namespace Misho.Cloud.MegaNz
             return Task.Run(() =>
             {
                 DateTime modificationDate = File.GetLastWriteTime(filename);
-                using (Stream stream = new ProgressionStream(new FileStream(filename, FileMode.Open, FileAccess.Read), progress, this.options.ReportProgressChunkSize))
+                using (Stream stream = new ProgressionStream(new FileStream(filename, FileMode.Open, FileAccess.Read), progress, options.ReportProgressChunkSize))
                 {
-                    return this.Upload(stream, Path.GetFileName(filename), parent, modificationDate, cancellationToken);
+                    return Upload(stream, Path.GetFileName(filename), parent, modificationDate, cancellationToken);
                 }
             }, cancellationToken.GetValueOrDefault());
         }
 
         public Task<INodeInfo> GetNodeFromLinkAsync(Uri uri)
         {
-            return Task.Run(() => this.GetNodeFromLink(uri));
+            return Task.Run(() => GetNodeFromLink(uri));
         }
 
         public Task<IEnumerable<INode>> GetNodesFromLinkAsync(Uri uri)
         {
-            return Task.Run(() => this.GetNodesFromLink(uri));
+            return Task.Run(() => GetNodesFromLink(uri));
         }
     }
 }

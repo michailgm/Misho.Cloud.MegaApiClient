@@ -30,8 +30,6 @@ namespace Misho.Cloud.MegaNz
         private uint sequenceIndex = (uint)(uint.MaxValue * new Random().NextDouble());
         private bool authenticatedLogin;
 
-        #region Constructors
-
         /// <summary>
         /// Instantiate a new <see cref="MegaApiClient" /> object with default <see cref="Options"/> and default <see cref="IWebClient"/> 
         /// </summary>
@@ -76,10 +74,6 @@ namespace Misho.Cloud.MegaNz
             this.webClient.BufferSize = options.BufferSize;
         }
 
-        #endregion
-
-        #region Public API
-
         /// <summary>
         /// Generate authentication informations and store them in a serializable object to allow persistence
         /// </summary>
@@ -113,11 +107,7 @@ namespace Misho.Cloud.MegaNz
 
         public event EventHandler<ApiRequestFailedEventArgs> ApiRequestFailed;
 
-        public bool IsLoggedIn
-        {
-            get { return this.sessionId != null; }
-        }
-
+        public bool IsLoggedIn => sessionId != null;
         /// <summary>
         /// Login to Mega.co.nz service using email/password credentials
         /// </summary>
@@ -128,7 +118,7 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="NotSupportedException">Already logged in</exception>
         public LogonSessionToken Login(string email, string password)
         {
-            return this.Login(GenerateAuthInfos(email, password));
+            return Login(GenerateAuthInfos(email, password));
         }
 
         /// <summary>
@@ -145,38 +135,38 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentNullException("authInfos");
             }
 
-            this.EnsureLoggedOut();
-            this.authenticatedLogin = true;
+            EnsureLoggedOut();
+            authenticatedLogin = true;
 
             // Request Mega Api
             LoginRequest request = new LoginRequest(authInfos.Email, authInfos.Hash);
-            LoginResponse response = this.Request<LoginResponse>(request);
+            LoginResponse response = Request<LoginResponse>(request);
 
             // Decrypt master key using our password key
             byte[] cryptedMasterKey = response.MasterKey.FromBase64();
-            this.masterKey = Crypto.DecryptKey(cryptedMasterKey, authInfos.PasswordAesKey);
+            masterKey = Crypto.DecryptKey(cryptedMasterKey, authInfos.PasswordAesKey);
 
             // Decrypt RSA private key using decrypted master key
             byte[] cryptedRsaPrivateKey = response.PrivateKey.FromBase64();
-            BigInteger[] rsaPrivateKeyComponents = Crypto.GetRsaPrivateKeyComponents(cryptedRsaPrivateKey, this.masterKey);
+            BigInteger[] rsaPrivateKeyComponents = Crypto.GetRsaPrivateKeyComponents(cryptedRsaPrivateKey, masterKey);
 
             // Decrypt session id
             byte[] encryptedSid = response.SessionId.FromBase64();
             byte[] sid = Crypto.RsaDecrypt(encryptedSid.FromMPINumber(), rsaPrivateKeyComponents[0], rsaPrivateKeyComponents[1], rsaPrivateKeyComponents[2]);
 
             // Session id contains only the first 58 base64 characters
-            this.sessionId = sid.ToBase64().Substring(0, 58);
+            sessionId = sid.ToBase64().Substring(0, 58);
 
-            return new LogonSessionToken(this.sessionId, this.masterKey);
+            return new LogonSessionToken(sessionId, masterKey);
         }
 
         public void Login(LogonSessionToken logonSessionToken)
         {
-            this.EnsureLoggedOut();
-            this.authenticatedLogin = true;
+            EnsureLoggedOut();
+            authenticatedLogin = true;
 
-            this.sessionId = logonSessionToken.SessionId;
-            this.masterKey = logonSessionToken.MasterKey;
+            sessionId = logonSessionToken.SessionId;
+            masterKey = logonSessionToken.MasterKey;
         }
 
         /// <summary>
@@ -185,14 +175,14 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ApiException">Throws if service is not available</exception>
         public void LoginAnonymous()
         {
-            this.EnsureLoggedOut();
-            this.authenticatedLogin = false;
+            EnsureLoggedOut();
+            authenticatedLogin = false;
 
             Random random = new Random();
 
             // Generate random master key
-            this.masterKey = new byte[16];
-            random.NextBytes(this.masterKey);
+            masterKey = new byte[16];
+            random.NextBytes(masterKey);
 
             // Generate a random password used to encrypt the master key
             byte[] passwordAesKey = new byte[16];
@@ -202,23 +192,23 @@ namespace Misho.Cloud.MegaNz
             byte[] sessionChallenge = new byte[16];
             random.NextBytes(sessionChallenge);
 
-            byte[] encryptedMasterKey = Crypto.EncryptAes(this.masterKey, passwordAesKey);
+            byte[] encryptedMasterKey = Crypto.EncryptAes(masterKey, passwordAesKey);
 
             // Encrypt the session challenge with our generated master key
-            byte[] encryptedSessionChallenge = Crypto.EncryptAes(sessionChallenge, this.masterKey);
+            byte[] encryptedSessionChallenge = Crypto.EncryptAes(sessionChallenge, masterKey);
             byte[] encryptedSession = new byte[32];
             Array.Copy(sessionChallenge, 0, encryptedSession, 0, 16);
             Array.Copy(encryptedSessionChallenge, 0, encryptedSession, 16, encryptedSessionChallenge.Length);
 
             // Request Mega Api to obtain a temporary user handle
             AnonymousLoginRequest request = new AnonymousLoginRequest(encryptedMasterKey.ToBase64(), encryptedSession.ToBase64());
-            string userHandle = this.Request(request);
+            string userHandle = Request(request);
 
             // Request Mega Api to retrieve our temporary session id
             LoginRequest request2 = new LoginRequest(userHandle, null);
-            LoginResponse response2 = this.Request<LoginResponse>(request2);
+            LoginResponse response2 = Request<LoginResponse>(request2);
 
-            this.sessionId = response2.TemporarySessionId;
+            sessionId = response2.TemporarySessionId;
         }
 
         /// <summary>
@@ -227,16 +217,16 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="NotSupportedException">Not logged in</exception>
         public void Logout()
         {
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
-            if (this.authenticatedLogin == true)
+            if (authenticatedLogin == true)
             {
-                this.Request(new LogoutRequest());
+                Request(new LogoutRequest());
             }
 
             // Reset values retrieved by Login methods
-            this.masterKey = null;
-            this.sessionId = null;
+            masterKey = null;
+            sessionId = null;
         }
 
         /// <summary>
@@ -247,10 +237,10 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ApiException">Mega.co.nz service reports an error</exception>
         public IAccountInformation GetAccountInformation()
         {
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             AccountInformationRequest request = new AccountInformationRequest();
-            return this.Request<AccountInformationResponse>(request);
+            return Request<AccountInformationResponse>(request);
         }
 
         /// <summary>
@@ -261,15 +251,15 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ApiException">Mega.co.nz service reports an error</exception>
         public IEnumerable<INode> GetNodes()
         {
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             GetNodesRequest request = new GetNodesRequest();
-            GetNodesResponse response = this.Request<GetNodesResponse>(request, this.masterKey);
+            GetNodesResponse response = Request<GetNodesResponse>(request, masterKey);
 
             Node[] nodes = response.Nodes;
-            if (this.trashNode == null)
+            if (trashNode == null)
             {
-                this.trashNode = nodes.First(n => n.Type == NodeType.Trash);
+                trashNode = nodes.First(n => n.Type == NodeType.Trash);
             }
 
             return nodes.Distinct().OfType<INode>();
@@ -289,7 +279,7 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentNullException("parent");
             }
 
-            return this.GetNodes().Where(n => n.ParentId == parent.Id);
+            return GetNodes().Where(n => n.ParentId == parent.Id);
         }
 
         /// <summary>
@@ -316,15 +306,15 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("Invalid node type");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             if (moveToTrash)
             {
-                this.Move(node, this.trashNode);
+                Move(node, trashNode);
             }
             else
             {
-                this.Request(new DeleteRequest(node));
+                Request(new DeleteRequest(node));
             }
         }
 
@@ -354,14 +344,14 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("Invalid parent node");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             byte[] key = Crypto.CreateAesKey();
             byte[] attributes = Crypto.EncryptAttributes(new Attributes(name), key);
-            byte[] encryptedKey = Crypto.EncryptAes(key, this.masterKey);
+            byte[] encryptedKey = Crypto.EncryptAes(key, masterKey);
 
             CreateNodeRequest request = CreateNodeRequest.CreateFolderNodeRequest(parent, attributes.ToBase64(), encryptedKey.ToBase64(), key);
-            GetNodesResponse response = this.Request<GetNodesResponse>(request, this.masterKey);
+            GetNodesResponse response = Request<GetNodesResponse>(request, masterKey);
             return response.Nodes[0];
         }
 
@@ -386,14 +376,14 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("Invalid node");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             if (node.Type == NodeType.Directory)
             {
                 // Request an export share on the node or we will receive an AccessDenied
-                this.Request(new ShareNodeRequest(node, this.masterKey, this.GetNodes()));
+                Request(new ShareNodeRequest(node, masterKey, GetNodes()));
 
-                node = this.GetNodes().First(x => x.Equals(node));
+                node = GetNodes().First(x => x.Equals(node));
             }
 
             INodeCrypto nodeCrypto = node as INodeCrypto;
@@ -403,7 +393,7 @@ namespace Misho.Cloud.MegaNz
             }
 
             GetDownloadLinkRequest request = new GetDownloadLinkRequest(node);
-            string response = this.Request<string>(request);
+            string response = Request<string>(request);
 
             return new Uri(BaseUri, string.Format(
                 "/#{0}!{1}!{2}",
@@ -422,11 +412,7 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ArgumentNullException">node or outputFile is null</exception>
         /// <exception cref="ArgumentException">node is not valid (only <see cref="NodeType.File" /> can be downloaded)</exception>
         /// <exception cref="DownloadException">Checksum is invalid. Downloaded data are corrupted</exception>
-#if NET35
-    public void DownloadFile(INode node, string outputFile)
-#else
         public void DownloadFile(INode node, string outputFile, CancellationToken? cancellationToken = null)
-#endif
         {
             if (node == null)
             {
@@ -438,13 +424,9 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentNullException("outputFile");
             }
 
-#if NET35
-      using (Stream stream = this.Download(node))
-#else
-            using (Stream stream = this.Download(node, cancellationToken))
-#endif
+            using (Stream stream = Download(node, cancellationToken))
             {
-                this.SaveStream(stream, outputFile);
+                SaveStream(stream, outputFile);
             }
         }
 
@@ -458,11 +440,7 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ArgumentNullException">uri or outputFile is null</exception>
         /// <exception cref="ArgumentException">Uri is not valid (id and key are required)</exception>
         /// <exception cref="DownloadException">Checksum is invalid. Downloaded data are corrupted</exception>
-#if NET35
-    public void DownloadFile(Uri uri, string outputFile)
-#else
         public void DownloadFile(Uri uri, string outputFile, CancellationToken? cancellationToken = null)
-#endif
         {
             if (uri == null)
             {
@@ -474,13 +452,9 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentNullException("outputFile");
             }
 
-#if NET35
-      using (Stream stream = this.Download(uri))
-#else
-            using (Stream stream = this.Download(uri, cancellationToken))
-#endif
+            using (Stream stream = Download(uri, cancellationToken))
             {
-                this.SaveStream(stream, outputFile);
+                SaveStream(stream, outputFile);
             }
         }
 
@@ -493,11 +467,7 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ArgumentNullException">node or outputFile is null</exception>
         /// <exception cref="ArgumentException">node is not valid (only <see cref="NodeType.File" /> can be downloaded)</exception>
         /// <exception cref="DownloadException">Checksum is invalid. Downloaded data are corrupted</exception>
-#if NET35
-    public Stream Download(INode node)
-#else
         public Stream Download(INode node, CancellationToken? cancellationToken = null)
-#endif
         {
             if (node == null)
             {
@@ -515,21 +485,21 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("node must implement INodeCrypto");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             // Retrieve download URL
             DownloadUrlRequest downloadRequest = new DownloadUrlRequest(node);
-            DownloadUrlResponse downloadResponse = this.Request<DownloadUrlResponse>(downloadRequest);
+            DownloadUrlResponse downloadResponse = Request<DownloadUrlResponse>(downloadRequest);
 
-            Stream dataStream = this.webClient.GetRequestRaw(new Uri(downloadResponse.Url));
+            Stream dataStream = webClient.GetRequestRaw(new Uri(downloadResponse.Url));
 
             Stream resultStream = new MegaAesCtrStreamDecrypter(dataStream, downloadResponse.Size, nodeCrypto.Key, nodeCrypto.Iv, nodeCrypto.MetaMac);
-#if !NET35
+
             if (cancellationToken.HasValue)
             {
                 resultStream = new CancellableStream(resultStream, cancellationToken.Value);
             }
-#endif
+
             return resultStream;
         }
 
@@ -542,36 +512,32 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ArgumentNullException">uri is null</exception>
         /// <exception cref="ArgumentException">Uri is not valid (id and key are required)</exception>
         /// <exception cref="DownloadException">Checksum is invalid. Downloaded data are corrupted</exception>
-#if NET35
-    public Stream Download(Uri uri)
-#else
         public Stream Download(Uri uri, CancellationToken? cancellationToken = null)
-#endif
         {
             if (uri == null)
             {
                 throw new ArgumentNullException("uri");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             string id;
             byte[] iv, metaMac, key;
-            this.GetPartsFromUri(uri, out id, out iv, out metaMac, out key);
+            GetPartsFromUri(uri, out id, out iv, out metaMac, out key);
 
             // Retrieve download URL
             DownloadUrlRequestFromId downloadRequest = new DownloadUrlRequestFromId(id);
-            DownloadUrlResponse downloadResponse = this.Request<DownloadUrlResponse>(downloadRequest);
+            DownloadUrlResponse downloadResponse = Request<DownloadUrlResponse>(downloadRequest);
 
-            Stream dataStream = this.webClient.GetRequestRaw(new Uri(downloadResponse.Url));
+            Stream dataStream = webClient.GetRequestRaw(new Uri(downloadResponse.Url));
 
             Stream resultStream = new MegaAesCtrStreamDecrypter(dataStream, downloadResponse.Size, key, iv, metaMac);
-#if !NET35
+
             if (cancellationToken.HasValue)
             {
                 resultStream = new CancellableStream(resultStream, cancellationToken.Value);
             }
-#endif
+
             return resultStream;
         }
 
@@ -590,15 +556,15 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentNullException("uri");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             string id;
             byte[] iv, metaMac, key;
-            this.GetPartsFromUri(uri, out id, out iv, out metaMac, out key);
+            GetPartsFromUri(uri, out id, out iv, out metaMac, out key);
 
             // Retrieve attributes
             DownloadUrlRequestFromId downloadRequest = new DownloadUrlRequestFromId(id);
-            DownloadUrlResponse downloadResponse = this.Request<DownloadUrlResponse>(downloadRequest);
+            DownloadUrlResponse downloadResponse = Request<DownloadUrlResponse>(downloadRequest);
 
             return new NodeInfo(id, downloadResponse, key);
         }
@@ -619,15 +585,15 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentNullException("uri");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             string shareId;
             byte[] iv, metaMac, key;
-            this.GetPartsFromUri(uri, out shareId, out iv, out metaMac, out key);
+            GetPartsFromUri(uri, out shareId, out iv, out metaMac, out key);
 
             // Retrieve attributes
             GetNodesRequest getNodesRequest = new GetNodesRequest(shareId);
-            GetNodesResponse getNodesResponse = this.Request<GetNodesResponse>(getNodesRequest, key);
+            GetNodesResponse getNodesResponse = Request<GetNodesResponse>(getNodesRequest, key);
 
             return getNodesResponse.Nodes.Select(x => new PublicNode(x, shareId)).OfType<INode>();
         }
@@ -643,11 +609,7 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ArgumentNullException">filename or parent is null</exception>
         /// <exception cref="FileNotFoundException">filename is not found</exception>
         /// <exception cref="ArgumentException">parent is not valid (all types except <see cref="NodeType.File" /> are supported)</exception>
-#if NET35
-    public INode UploadFile(string filename, INode parent)
-#else
         public INode UploadFile(string filename, INode parent, CancellationToken? cancellationToken = null)
-#endif
         {
             if (string.IsNullOrEmpty(filename))
             {
@@ -664,16 +626,12 @@ namespace Misho.Cloud.MegaNz
                 throw new FileNotFoundException(filename);
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             DateTime modificationDate = File.GetLastWriteTime(filename);
             using (FileStream fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
             {
-#if NET35
-        return this.Upload(fileStream, Path.GetFileName(filename), parent, modificationDate);
-#else
-                return this.Upload(fileStream, Path.GetFileName(filename), parent, modificationDate, cancellationToken);
-#endif
+                return Upload(fileStream, Path.GetFileName(filename), parent, modificationDate, cancellationToken);
             }
         }
 
@@ -688,11 +646,7 @@ namespace Misho.Cloud.MegaNz
         /// <exception cref="ApiException">Mega.co.nz service reports an error</exception>
         /// <exception cref="ArgumentNullException">stream or name or parent is null</exception>
         /// <exception cref="ArgumentException">parent is not valid (all types except <see cref="NodeType.File" /> are supported)</exception>
-#if NET35
-    public INode Upload(Stream stream, string name, INode parent, DateTime? modificationDate = null)
-#else
         public INode Upload(Stream stream, string name, INode parent, DateTime? modificationDate = null, CancellationToken? cancellationToken = null)
-#endif
         {
             if (stream == null)
             {
@@ -714,29 +668,27 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("Invalid parent node");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
-#if !NET35
             if (cancellationToken.HasValue)
             {
                 stream = new CancellableStream(stream, cancellationToken.Value);
             }
-#endif
 
             string completionHandle = string.Empty;
-            int requestDelay = this.options.ApiRequestDelay;
-            int remainingRetry = this.options.ApiRequestAttempts;
+            int requestDelay = options.ApiRequestDelay;
+            int remainingRetry = options.ApiRequestAttempts;
             while (remainingRetry-- > 0)
             {
                 // Retrieve upload URL
                 UploadUrlRequest uploadRequest = new UploadUrlRequest(stream.Length);
-                UploadUrlResponse uploadResponse = this.Request<UploadUrlResponse>(uploadRequest);
+                UploadUrlResponse uploadResponse = Request<UploadUrlResponse>(uploadRequest);
 
                 ApiResultCode apiResult = ApiResultCode.Ok;
                 using (MegaAesCtrStreamCrypter encryptedStream = new MegaAesCtrStreamCrypter(stream))
                 {
                     var chunkStartPosition = 0;
-                    var chunksSizesToUpload = this.ComputeChunksSizesToUpload(encryptedStream.ChunksPositions, encryptedStream.Length).ToArray();
+                    var chunksSizesToUpload = ComputeChunksSizesToUpload(encryptedStream.ChunksPositions, encryptedStream.Length).ToArray();
                     Uri uri = null;
                     for (int i = 0; i < chunksSizesToUpload.Length; i++)
                     {
@@ -752,7 +704,7 @@ namespace Misho.Cloud.MegaNz
                             chunkStartPosition += chunkSize;
                             try
                             {
-                                completionHandle = this.webClient.PostRequestRaw(uri, chunkStream);
+                                completionHandle = webClient.PostRequestRaw(uri, chunkStream);
                                 if (string.IsNullOrEmpty(completionHandle))
                                 {
                                     apiResult = ApiResultCode.Ok;
@@ -769,7 +721,7 @@ namespace Misho.Cloud.MegaNz
                             catch (Exception ex)
                             {
                                 apiResult = ApiResultCode.RequestFailedRetry;
-                                this.ApiRequestFailed?.Invoke(this, new ApiRequestFailedEventArgs(uri, remainingRetry, requestDelay, apiResult, ex));
+                                ApiRequestFailed?.Invoke(this, new ApiRequestFailedEventArgs(uri, remainingRetry, requestDelay, apiResult, ex));
 
                                 break;
                             }
@@ -778,12 +730,12 @@ namespace Misho.Cloud.MegaNz
 
                     if (apiResult != ApiResultCode.Ok)
                     {
-                        this.ApiRequestFailed?.Invoke(this, new ApiRequestFailedEventArgs(uri, remainingRetry, requestDelay, apiResult, completionHandle));
+                        ApiRequestFailed?.Invoke(this, new ApiRequestFailedEventArgs(uri, remainingRetry, requestDelay, apiResult, completionHandle));
 
                         if (apiResult == ApiResultCode.RequestFailedRetry || apiResult == ApiResultCode.RequestFailedPermanetly || apiResult == ApiResultCode.TooManyRequests)
                         {
                             // Restart upload from the beginning
-                            Thread.Sleep(requestDelay = (int)Math.Round(requestDelay * this.options.ApiRequestDelayExponentialFactor));
+                            Thread.Sleep(requestDelay = (int)Math.Round(requestDelay * options.ApiRequestDelayExponentialFactor));
 
                             // Reset steam position
                             stream.Seek(0, SeekOrigin.Begin);
@@ -811,10 +763,10 @@ namespace Misho.Cloud.MegaNz
                         fileKey[i + 16] = encryptedStream.MetaMac[i - 8];
                     }
 
-                    byte[] encryptedKey = Crypto.EncryptKey(fileKey, this.masterKey);
+                    byte[] encryptedKey = Crypto.EncryptKey(fileKey, masterKey);
 
                     CreateNodeRequest createNodeRequest = CreateNodeRequest.CreateFileNodeRequest(parent, cryptedAttributes.ToBase64(), encryptedKey.ToBase64(), fileKey, completionHandle);
-                    GetNodesResponse createNodeResponse = this.Request<GetNodesResponse>(createNodeRequest, this.masterKey);
+                    GetNodesResponse createNodeResponse = Request<GetNodesResponse>(createNodeRequest, masterKey);
                     return createNodeResponse.Nodes[0];
                 }
             }
@@ -855,10 +807,10 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("Invalid destination parent node");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
-            this.Request(new MoveRequest(node, destinationParentNode));
-            return this.GetNodes().First(n => n.Equals(node));
+            Request(new MoveRequest(node, destinationParentNode));
+            return GetNodes().First(n => n.Equals(node));
         }
 
         public INode Rename(INode node, string newName)
@@ -884,16 +836,12 @@ namespace Misho.Cloud.MegaNz
                 throw new ArgumentException("node must implement INodeCrypto");
             }
 
-            this.EnsureLoggedIn();
+            EnsureLoggedIn();
 
             byte[] encryptedAttributes = Crypto.EncryptAttributes(new Attributes(newName, ((Node)node).Attributes), nodeCrypto.Key);
-            this.Request(new RenameRequest(node, encryptedAttributes.ToBase64()));
-            return this.GetNodes().First(n => n.Equals(node));
+            Request(new RenameRequest(node, encryptedAttributes.ToBase64()));
+            return GetNodes().First(n => n.Equals(node));
         }
-
-        #endregion
-
-        #region Private static methods
 
         private static string GenerateHash(string email, byte[] passwordAesKey)
         {
@@ -938,28 +886,24 @@ namespace Misho.Cloud.MegaNz
             return pkey;
         }
 
-        #endregion
-
-        #region Web
-
         private string Request(RequestBase request)
         {
-            return this.Request<string>(request);
+            return Request<string>(request);
         }
 
         private TResponse Request<TResponse>(RequestBase request, object context = null)
                 where TResponse : class
         {
-            if (this.options.SynchronizeApiRequests)
+            if (options.SynchronizeApiRequests)
             {
-                lock (this.apiRequestLocker)
+                lock (apiRequestLocker)
                 {
-                    return this.RequestCore<TResponse>(request, context);
+                    return RequestCore<TResponse>(request, context);
                 }
             }
             else
             {
-                return this.RequestCore<TResponse>(request, context);
+                return RequestCore<TResponse>(request, context);
             }
         }
 
@@ -967,13 +911,13 @@ namespace Misho.Cloud.MegaNz
             where TResponse : class
         {
             string dataRequest = JsonConvert.SerializeObject(new object[] { request });
-            Uri uri = this.GenerateUrl(request.QueryArguments);
+            Uri uri = GenerateUrl(request.QueryArguments);
             object jsonData = null;
-            int requestDelay = this.options.ApiRequestDelay;
-            int remainingRetry = this.options.ApiRequestAttempts;
+            int requestDelay = options.ApiRequestDelay;
+            int remainingRetry = options.ApiRequestAttempts;
             while (remainingRetry-- > 0)
             {
-                string dataResult = this.webClient.PostRequestJson(uri, dataRequest);
+                string dataResult = webClient.PostRequestJson(uri, dataRequest);
 
                 if (string.IsNullOrEmpty(dataResult)
                   || (jsonData = JsonConvert.DeserializeObject(dataResult)) == null
@@ -988,12 +932,12 @@ namespace Misho.Cloud.MegaNz
 
                     if (apiCode != ApiResultCode.Ok)
                     {
-                        this.ApiRequestFailed?.Invoke(this, new ApiRequestFailedEventArgs(uri, this.options.ApiRequestAttempts - remainingRetry, requestDelay, apiCode, dataResult));
+                        ApiRequestFailed?.Invoke(this, new ApiRequestFailedEventArgs(uri, options.ApiRequestAttempts - remainingRetry, requestDelay, apiCode, dataResult));
                     }
 
                     if (apiCode == ApiResultCode.RequestFailedRetry)
                     {
-                        Thread.Sleep(requestDelay = (int)Math.Round(requestDelay * this.options.ApiRequestDelayExponentialFactor));
+                        Thread.Sleep(requestDelay = (int)Math.Round(requestDelay * options.ApiRequestDelayExponentialFactor));
                         continue;
                     }
 
@@ -1017,12 +961,12 @@ namespace Misho.Cloud.MegaNz
         {
             UriBuilder builder = new UriBuilder(BaseApiUri);
             NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
-            query["id"] = (this.sequenceIndex++ % uint.MaxValue).ToString(CultureInfo.InvariantCulture);
-            query["ak"] = this.options.ApplicationKey;
+            query["id"] = (sequenceIndex++ % uint.MaxValue).ToString(CultureInfo.InvariantCulture);
+            query["ak"] = options.ApplicationKey;
 
-            if (!string.IsNullOrEmpty(this.sessionId))
+            if (!string.IsNullOrEmpty(sessionId))
             {
-                query["sid"] = this.sessionId;
+                query["sid"] = sessionId;
             }
 
             query.Add(queryArguments);
@@ -1035,17 +979,13 @@ namespace Misho.Cloud.MegaNz
         {
             using (FileStream fs = new FileStream(outputFile, FileMode.CreateNew, FileAccess.Write))
             {
-                stream.CopyTo(fs, this.options.BufferSize);
+                stream.CopyTo(fs, options.BufferSize);
             }
         }
 
-        #endregion
-
-        #region Private methods
-
         private void EnsureLoggedIn()
         {
-            if (this.sessionId == null)
+            if (sessionId == null)
             {
                 throw new NotSupportedException("Not logged in");
             }
@@ -1053,7 +993,7 @@ namespace Misho.Cloud.MegaNz
 
         private void EnsureLoggedOut()
         {
-            if (this.sessionId != null)
+            if (sessionId != null)
             {
                 throw new NotSupportedException("Already logged in");
             }
@@ -1094,7 +1034,7 @@ namespace Misho.Cloud.MegaNz
                   : chunksPositions[i + 1];
 
                 // Pack multiple chunks in a single upload
-                while (((int)(nextChunkPosition - currentChunkPosition) < this.options.ChunksPackSize || this.options.ChunksPackSize == -1) && i < chunksPositions.Length - 1)
+                while (((int)(nextChunkPosition - currentChunkPosition) < options.ChunksPackSize || options.ChunksPackSize == -1) && i < chunksPositions.Length - 1)
                 {
                     i++;
                     nextChunkPosition = i == chunksPositions.Length - 1
@@ -1106,17 +1046,13 @@ namespace Misho.Cloud.MegaNz
             }
         }
 
-        #endregion
-
-        #region AuthInfos
-
         public class AuthInfos
         {
             public AuthInfos(string email, string hash, byte[] passwordAesKey)
             {
-                this.Email = email;
-                this.Hash = hash;
-                this.PasswordAesKey = passwordAesKey;
+                Email = email;
+                Hash = hash;
+                PasswordAesKey = passwordAesKey;
             }
 
             [JsonProperty]
@@ -1143,8 +1079,8 @@ namespace Misho.Cloud.MegaNz
 
             public LogonSessionToken(string sessionId, byte[] masterKey)
             {
-                this.SessionId = sessionId;
-                this.MasterKey = masterKey;
+                SessionId = sessionId;
+                MasterKey = masterKey;
             }
 
             public bool Equals(LogonSessionToken other)
@@ -1154,12 +1090,12 @@ namespace Misho.Cloud.MegaNz
                     return false;
                 }
 
-                if (this.SessionId == null || other.SessionId == null || string.Compare(this.SessionId, other.SessionId) != 0)
+                if (SessionId == null || other.SessionId == null || string.Compare(SessionId, other.SessionId) != 0)
                 {
                     return false;
                 }
 
-                if (this.MasterKey == null || other.MasterKey == null || !Enumerable.SequenceEqual(MasterKey, other.MasterKey))
+                if (MasterKey == null || other.MasterKey == null || !Enumerable.SequenceEqual(MasterKey, other.MasterKey))
                 {
                     return false;
                 }
@@ -1167,8 +1103,5 @@ namespace Misho.Cloud.MegaNz
                 return true;
             }
         }
-
-        #endregion
-
     }
 }
