@@ -19,8 +19,6 @@
 bld/
 [Bb]in/
 [Oo]bj/
-Misho.Cloud.MegaNz.Android/[Oo]bj/
-Misho.Cloud.MegaNz.Android/[Bb]in/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -70,6 +68,7 @@ artifacts/
 *.scc
 *.bak
 *.orig
+.refsignored
 
 # Chutzpah Test files
 _Chutzpah*
