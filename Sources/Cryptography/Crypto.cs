@@ -1,4 +1,4 @@
-﻿namespace CG.Web.MegaApiClient
+﻿namespace Misho.Cloud.MegaNz
 {
   using System;
   using System.Security.Cryptography;
