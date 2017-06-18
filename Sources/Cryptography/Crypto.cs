@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security.Cryptography;
-
 using Newtonsoft.Json;
 using Misho.Security.Cryptography;
 
