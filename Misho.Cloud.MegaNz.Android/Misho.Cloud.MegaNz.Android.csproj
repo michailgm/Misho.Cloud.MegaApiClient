@@ -9,7 +9,7 @@
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Misho.Cloud.MegaNz.Android</RootNamespace>
+    <RootNamespace>Misho.Cloud.MegaNz</RootNamespace>
     <AssemblyName>Misho.Cloud.MegaNz.Android</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
@@ -35,15 +35,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Misho.Json.Serialization.Android">
+      <HintPath>..\Lib\Android\Debug\Misho.Json.Serialization.Android.dll</HintPath>
+    </Reference>
     <Reference Include="Misho.Security.Cryptography.Android">
       <HintPath>..\Lib\Android\Debug\Misho.Security.Cryptography.Android.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Android" />
-    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -101,17 +103,7 @@
     <Compile Include="..\Sources\WebClient_HttpClient.cs">
       <Link>Sources\WebClient_HttpClient.cs</Link>
     </Compile>
-    <Compile Include="..\Sources\WebClient_HttpWebRequest.cs">
-      <Link>Sources\WebClient_HttpWebRequest.cs</Link>
-    </Compile>
-    <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\AboutResources.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

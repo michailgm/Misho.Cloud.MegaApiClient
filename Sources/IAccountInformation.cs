@@ -1,24 +1,24 @@
 using System.Collections.Generic;
 
-namespace CG.Web.MegaApiClient
+namespace Misho.Cloud.MegaNz
 {
-  public interface IAccountInformation
-  {
-    long TotalQuota { get; }
+    public interface IAccountInformation
+    {
+        long TotalQuota { get; }
 
-    long UsedQuota { get; }
+        long UsedQuota { get; }
 
-    IEnumerable<IStorageMetrics> Metrics { get; }
-  }
+        IEnumerable<IStorageMetrics> Metrics { get; }
+    }
 
-  public interface IStorageMetrics
-  {
-    string NodeId { get; }
+    public interface IStorageMetrics
+    {
+        string NodeId { get; }
 
-    long BytesUsed { get; }
+        long BytesUsed { get; }
 
-    long FilesCount { get; }
+        long FilesCount { get; }
 
-    long FoldersCount { get; }
-  }
+        long FoldersCount { get; }
+    }
 }
